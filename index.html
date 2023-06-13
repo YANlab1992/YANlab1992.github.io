@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="dist/jspsych.js"></script>
+    <script src="dist/plugin-html-keyboard-response.js"></script>
+    <script src="dist/plugin-html-button-response.js"></script>
+    <script src="dist/plugin-image-keyboard-response.js"></script>
+    <script src="dist/plugin-preload.js"></script>
+    <script src="dist/plugin-webgazer-init-camera.js"></script>
+    <script src="dist/plugin-webgazer-calibrate.js"></script>
+    <script src="dist/plugin-webgazer-validate.js"></script>
+    <script src="examples/js/webgazer/webgazer.js"></script>
+    <script src="dist/extension-webgazer.js"></script>
+    <link rel="stylesheet" href="dist/jspsych.css" />
+    <style>
+      .jspsych-content {
+        max-width: 100%;
+      }
+    </style>
+  </head>
+  <body></body>
+  <script>
+
+    var jsPsych = initJsPsych({
+      extensions: [
+        {type: jsPsychExtensionWebgazer}
+      ]
+    });
+
+    var camera_instructions = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p>本实验将调用你的摄像头记录眼动.</p>
+        <p>请授权我们使用你的摄像头.</p>
+        <p>在下个界面，请点击授权.</p>
+        <p>如果你不愿意授权，请关闭页面，退出实验.</p>
+      `,
+      choices: ['点击开始'],
+      post_trial_gap: 1000
+    };
+
+    var init_camera = {
+      type: jsPsychWebgazerInitCamera
+    };
+
+    var calibration_instructions = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p>现在我们将调用摄像头记录你的眼动.</p>
+        <p>请先进行校准.</p>
+        <p>请保持头部静止，并认真观看一些黑点.</p>
+      `,
+      choices: ['点击开始'],
+      post_trial_gap: 1000
+    };
+
+    var calibration = {
+      type: jsPsychWebgazerCalibrate,
+      calibration_points: [[50,50], [50,12], [12,12], [12,50], [12,88], [50,88], [88,88], [88,50], [88,12]],
+      calibration_mode: 'view',
+      time_per_point: 2050,
+      randomize_calibration_order: true,
+    };
+
+    var validation_instructions = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p>让我们确认眼动的结果是否准确 </p>
+        <p>请保持头部静止，并认真观看一些黑点.</p>
+      `,
+      choices: ['点击开始'],
+      post_trial_gap: 1000
+    };
+
+    var validation = {
+      type: jsPsychWebgazerValidate,
+      validation_points: [[50,50], [50,12], [12,12], [12,50], [12,88], [50,88], [88,88], [88,50], [88,12]],
+      validation_point_coordinates: 'percent',
+      roi_radius: 100,
+      show_validation_data: false
+    };
+
+    var task_instructions = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p>现在准备开始进行实验.</p>
+        <p>你需要对当前的事件做出判断，是否改变当前行进汽车的方向？.</p>
+        <p>你的任务是改变按A，不改变按L.</p>
+      `,
+      choices: ['点击开始!'],
+      post_trial_gap: 1000
+    };
+
+    var fixation = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<p style="font-size:40px;">+</p>',
+      choices: "NO_KEYS",
+      trial_duration: 500
+    };
+
+    var preload = {
+      type: jsPsychPreload,
+      auto_preload: true
+    };
+
+    var trial = {
+      type: jsPsychImageKeyboardResponse,
+      stimulus: jsPsych.timelineVariable('stim'),
+      trial_duration: null,
+      choices: ['a','l'],
+      prompt: '<p>是否按键拯救？.</p>',
+      stimulus_width: 900, 
+      maintain_aspect_ratio: true,
+      post_trial_gap: 0,
+      //render_on_canvas: false 
+      extensions: [
+        {
+          type: jsPsychExtensionWebgazer, 
+          params: {targets: ['#jspsych-image-keyboard-response-stimulus']}}  
+      ]
+    };
+
+    var trial_proc = {
+      timeline: [fixation, trial],
+      timeline_variables: [ 
+        {stim: 'media/image/13.jpg'},
+        {stim: 'media/image/15.jpg'},
+        {stim: 'media/image/31.jpg'},
+        {stim: 'media/image/51.jpg'}
+      ]
+    };
+
+    var done = {
+      type: jsPsychHtmlButtonResponse,
+      choices: ['点击退出实验'],
+      stimulus: `<p>实验结束!</p>`,
+      on_finish: function(data){
+        if(data.response == 0){
+          jsPsych.data.get().localSave('csv','webgazer-sample-data.csv');
+        }
+      }
+    };
+
+    var timeline = [];
+    timeline.push(camera_instructions);
+    timeline.push(init_camera);
+    timeline.push(calibration_instructions);
+    timeline.push(calibration);
+    timeline.push(validation_instructions);
+    timeline.push(validation);
+    timeline.push(task_instructions);
+    timeline.push(trial_proc);
+    timeline.push(done);
+
+    jsPsych.run(timeline);
+
+  </script>
+</html>
