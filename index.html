@@ -112,10 +112,6 @@ const welcome = {
     <div style="max-width:800px; margin: 0 auto; line-height:1.8; text-align:left;">
       <h2>中小学教师共情特点测试</h2>
       <p>本测验共有 <strong>${questions.length}</strong> 道题，每题有两个选项，请根据你在真实教学中的<span style="color:#d9534f;">自然倾向</span>作答，没有对错之分。</p>
-      <ul>
-        <li>A 选项一般表示更高的共情反应；</li>
-        <li>B 选项一般表示相对理性或距离感更强。</li>
-      </ul>
       <p>作答完成后，系统会计算你在<strong>认知共情 (C)</strong>、<strong>情绪共情 (E)</strong> 和<strong>行为共情 (B)</strong> 三个维度的得分，并给出共情类型与雷达图。</p>
       <p style="text-align:center; margin-top:20px;">点击下方按钮开始测试。</p>
     </div>
@@ -215,7 +211,6 @@ const resultTrial = {
       </div>
     `;
   },
-  choices: ['重新测试'],
   on_load: function() {
     // 绘制雷达图
     const ctx = document.getElementById('radarChart').getContext('2d');
@@ -271,3 +266,4 @@ jsPsych.run(timeline);
 </script>
 </body>
 </html>
+
