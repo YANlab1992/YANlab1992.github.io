@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>中小学教师共情特点测试（30题）</title>
 
-  <!-- jsPsych 7 核心库（你也可以换回本地 dist 版本） -->
+  <!-- jsPsych 7 核心库（你也可以改回本地 dist 目录） -->
   <script src="dist/jspsych.js"></script>
   <link rel="stylesheet" href="dist/jspsych.css" />
   <script src="dist/plugin-html-button-response.js"></script>
@@ -132,6 +132,23 @@ const questions = [
 ];
 
 /**********************
+ * 共情类型定义（与 Pygame 版本一致）
+ **********************/
+const empathyTypes = {
+  "HHH": { name: "心灵导师型", desc: "认知、情绪、行为三个维度均高。您能精准理解学生，感同身受，并总能采取恰当的支援行动。" },
+  "HLH": { name: "理智导航员型", desc: "高认知、低情绪、高行为。您能冷静分析学生的问题并有效行动，但不太卷入情绪。" },
+  "LHH": { name: "炽热火焰型", desc: "低认知、高情绪、高行为。您富有同情心与行动力，但有时可能好心办错事。" },
+  "HHL": { name: "逻辑分析师型", desc: "高认知、高情绪、低行为。您能洞察学生的心理，但行动上稍显保守。" },
+  "LLH": { name: "淡泊守护者型", desc: "低认知、低情绪、高行为。您通过行动表达关怀，务实而温和。" },
+  "LHL": { name: "知心听众型", desc: "低认知、高情绪、低行为。您心地柔软，乐于倾听但行动不足。" },
+  "HLL": { name: "规则执行者型", desc: "高认知、低情绪、低行为。您理性分析但感情投入较少。" },
+  "LLL": { name: "客观观察者型", desc: "三个维度均低，您更注重知识传授与规则执行。" }
+};
+
+// 每个维度最大分数（10道题，每题1分）
+const maxScores = { C: 10, E: 10, B: 10 };
+
+/**********************
  * 初始化 jsPsych
  **********************/
 const jsPsych = initJsPsych();
@@ -166,18 +183,17 @@ questions.forEach((q, idx) => {
       </div>
     `,
     choices: q.opt,            // 两个选项 A / B
-    // 这里不再使用 button_html 数组，避免长度不匹配的报错
     data: {dim: q.dim, key: q.key, index: idx + 1},
     on_finish: function(data) {
-      const chosen = (data.response === 0) ? "A" : "B"; // 0 -> 第一个选项, 1 -> 第二个
-      data.score = (chosen === data.key) ? 1 : 0;       // 选中“计分选项”得 1 分
+      const chosen = (data.response === 0) ? "A" : "B"; // 0 -> 第一个选项
+      data.score = (chosen === data.key) ? 1 : 0;       // 选中计分选项得 1 分
       data.task = "question";
     }
   });
 });
 
 /**********************
- * 结果 + 雷达图 trial
+ * 结果 + 类型 + 雷达图 trial
  **********************/
 timeline.push({
   type: jsPsychHtmlButtonResponse,
@@ -188,30 +204,46 @@ timeline.push({
       scores[t.dim] += t.score;
     });
 
-    // 每维度 10 题，每题 1 分，最大 10
-    const percC = scores.C / 10;
-    const percE = scores.E / 10;
-    const percB = scores.B / 10;
+    // 各维度比例
+    const percents = {};
+    let code = "";
+    ["C","E","B"].forEach(dim => {
+      const ratio = scores[dim] / (maxScores[dim] || 1);
+      percents[dim] = ratio;
+      code += (ratio >= 0.5) ? "H" : "L";  // >=50% 视为高
+    });
 
-    // 存到全局，给 on_load 的 Chart.js 用
+    const typeInfo = empathyTypes[code] || empathyTypes["LLL"];
+
+    // 存给雷达图使用
     window.radarData = {
       labels: ["认知共情", "情绪共情", "行为共情"],
-      data: [percC, percE, percB],
-      raw: scores
+      data: [percents["C"], percents["E"], percents["B"]],
+      raw: scores,
+      code: code,
+      typeInfo: typeInfo
     };
 
     return `
       <div style="line-height:1.8;">
         <h2>测试结果</h2>
+
+        <h3>您的共情类型：<span style="color:#007bff;">${typeInfo.name}</span></h3>
+        <p>${typeInfo.desc}</p>
+        <p style="font-size:13px;color:#888;">类型代码：${code}（按认知C / 情绪E / 行为B 三个维度高低组合）</p>
+
+        <h4>各维度得分：</h4>
         <ul>
-          <li>认知共情 (C)：${scores.C} / 10</li>
-          <li>情绪共情 (E)：${scores.E} / 10</li>
-          <li>行为共情 (B)：${scores.B} / 10</li>
+          <li>认知共情 (C)：${scores.C} / ${maxScores.C}</li>
+          <li>情绪共情 (E)：${scores.E} / ${maxScores.E}</li>
+          <li>行为共情 (B)：${scores.B} / ${maxScores.B}</li>
         </ul>
+
         <p>下方雷达图展示三个维度的<strong>相对水平（0~1）</strong>：</p>
         <div style="width:420px;height:420px;margin:0 auto;">
           <canvas id="radarChart"></canvas>
         </div>
+
         <p style="margin-top:16px;font-size:13px;color:#666;">
           提示：本测验仅用于教学与自我觉察，不作为专业诊断依据。
         </p>
@@ -221,6 +253,7 @@ timeline.push({
   on_load: function() {
     const ctx = document.getElementById('radarChart').getContext('2d');
     const d = window.radarData;
+
     new Chart(ctx, {
       type: 'radar',
       data: {
