@@ -2,231 +2,237 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>中小学教师共情特点测试</title>
+  <title>中小学教师共情特点测试（30题）</title>
 
-  <!-- jsPsych 7 核心库 -->
+  <!-- jsPsych 7 核心库（你也可以换回本地 dist 版本） -->
   <script src="dist/jspsych.js"></script>
   <link rel="stylesheet" href="dist/jspsych.css" />
-
-  <!-- 常用插件：html-button-response -->
   <script src="dist/plugin-html-button-response.js"></script>
 
-  <!-- Chart.js，用于雷达图 -->
+  <!-- Chart.js 用于雷达图 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
-      background-color: #f7f7f7;
+      background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
       font-family: "Microsoft Yahei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #222;
     }
     .jspsych-content {
-      max-width: 900px !important;
+      max-width: 800px !important;
+      text-align: left !important;
+    }
+
+    /* 控制按钮所在容器，固定左右布局 */
+    #jspsych-html-button-response-btngroup {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 28px;
+    }
+
+    /* 美化按钮外观 */
+    #jspsych-html-button-response-btngroup .jspsych-btn {
+      width: 48%;
+      padding: 14px 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 2px solid #007bff;
+      background-color: #ffffff;
+      color: #007bff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.15s ease-in-out;
+      white-space: normal;
+      line-height: 1.5;
+    }
+
+    #jspsych-html-button-response-btngroup .jspsych-btn:hover {
+      background-color: #007bff;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
     }
   </style>
 </head>
+
 <body>
 <script>
 /**********************
- * 题目与维度定义
+ * 30 题题库与维度定义
+ * 1–10: 认知共情 C
+ * 11–20: 情绪共情 E
+ * 21–30: 行为共情 B
  **********************/
 const questions = [
-  {question: "1. 当学生回答问题支支吾吾时，你更倾向于：",
-   options: ["A. 猜想他可能紧张或不理解，耐心引导他", "B. 直接让他坐下，叫另一个学生回答"], dimension: "C"},
-  {question: "2. 当学生因为与朋友吵架而情绪低落时，你更倾向于：",
-   options: ["A. 感受他的悲伤，并倾听他的烦恼", "B. 告诉他专注于学习，不要想太多"], dimension: "E"},
-  {question: "3. 当学生忘记带午餐时，你更倾向于：",
-   options: ["A. 分享自己的午餐或帮他安排午餐", "B. 提醒他下次记得带"], dimension: "B"},
-  {question: "4. 当学生经常迟到时，你更倾向于：",
-   options: ["A. 了解他迟到的原因，比如家庭情况", "B. 按照校规处理，给予警告"], dimension: "C"},
-  {question: "5. 当学生在课堂上突然大笑时，你更倾向于：",
-   options: ["A. 好奇他为什么笑，并可能一起笑", "B. 制止他，维持课堂纪律"], dimension: "E"},
-  {question: "6. 当学生需要额外帮助时，你更倾向于：",
-   options: ["A. 主动安排时间为他辅导", "B. 建议他利用课后资源自学"], dimension: "B"},
-  {question: "7. 当学生提交的作文内容消极时，你更倾向于：",
-   options: ["A. 思考他是否遇到了心理问题，并与他沟通", "B. 只从文学角度评价作文"], dimension: "C"},
-  {question: "8. 当学生获得奖项时，你更倾向于：",
-   options: ["A. 为他感到骄傲，并公开表扬", "B. 简单恭喜，然后继续课程"], dimension: "E"},
-  {question: "9. 当学生受伤时，你更倾向于：",
-   options: ["A. 立即采取急救措施，并安慰他", "B. 送他去医务室，然后返回课堂"], dimension: "B"},
-  {question: "10. 当学生突然沉默寡言时，你更倾向于：",
-   options: ["A. 观察他是否有什么变化，并尝试了解原因", "B. 认为他可能只是累了，不打扰他"], dimension: "C"},
-  {question: "11. 当学生因为宠物去世而哭泣时，你更倾向于：",
-   options: ["A. 理解他的痛苦，并给予情感支持", "B. 告诉他生命无常，要坚强"], dimension: "E"},
-  {question: "12. 当学生家庭经济困难时，你更倾向于：",
-   options: ["A. 悄悄提供帮助，如购买学习用品", "B. 建议他申请学校补助"], dimension: "B"},
-  {question: "13. 当学生在小组活动中不合作时，你更倾向于：",
-   options: ["A. 考虑他是否与组员有矛盾，并调解", "B. 批评他不团队合作"], dimension: "C"},
-  {question: "14. 当学生对你发脾气时，你更倾向于：",
-   options: ["A. 保持冷静，试图理解他的情绪根源", "B. 感到生气，并指责他不尊重老师"], dimension: "E"},
-  {question: "15. 当学生想参加比赛但缺乏信心时，你更倾向于：",
-   options: ["A. 鼓励他并帮助他准备比赛", "B. 告诉他如果没信心就不要参加"], dimension: "B"},
-  {question: "16. 当学生经常抄袭作业时，你更倾向于：",
-   options: ["A. 了解他为什么抄袭，是否学习有困难", "B. 惩罚他，以儆效尤"], dimension: "C"},
-  {question: "17. 当学生因为父母离婚而情绪波动时，你更倾向于：",
-   options: ["A. 感到同情，并提供情感港湾", "B. 建议他寻求专业心理咨询"], dimension: "E"},
-  {question: "18. 当学生被欺负时，你更倾向于：",
-   options: ["A. 立即干预，并确保他的安全", "B. 报告给学校处理"], dimension: "B"},
-  {question: "19. 当学生提出古怪问题时，你更倾向于：",
-   options: ["A. 欣赏他的好奇心，并引导探索", "B. 认为问题无关紧要，忽略它"], dimension: "C"},
-  {question: "20. 当学生毕业时表达对你不舍，你更倾向于：",
-   options: ["A. 感动并表达对他的祝福", "B. 告诉他这是成长的必然"], dimension: "E"}
+  // 认知共情 C（1–10）
+  {q:"当学生考试成绩不理想时，你首先会怎么想？",
+   opt:["A. 他可能没有充分复习。","B. 他可能遇到了什么困难。"], key:"B", dim:"C"},
+  {q:"学生上课时心不在焉，你会认为？",
+   opt:["A. 他可能有什么心事。","B. 他可能对课程不感兴趣。"], key:"A", dim:"C"},
+  {q:"当学生突然发脾气时，你的第一反应是？",
+   opt:["A. 他可能遇到了挫折。","B. 他可能故意捣乱。"], key:"A", dim:"C"},
+  {q:"学生经常迟到，你会怎么想？",
+   opt:["A. 他可能懒惰或不守时。","B. 他可能家庭有困难或交通问题。"], key:"B", dim:"C"},
+  {q:"当学生提出一个奇怪的问题时，你会？",
+   opt:["A. 尝试理解他的思考角度。","B. 觉得他可能没有认真听讲。"], key:"A", dim:"C"},
+  {q:"学生不愿意参加集体活动，你会认为？",
+   opt:["A. 他可能害怕或害羞。","B. 他可能性格孤僻。"], key:"A", dim:"C"},
+  {q:"当学生抱怨作业太多时，你会？",
+   opt:["A. 考虑作业是否合理他的能力。","B. 认为他不想努力。"], key:"A", dim:"C"},
+  {q:"学生与同学发生矛盾，你会？",
+   opt:["A. 先听他的解释。","B. 立即批评他。"], key:"A", dim:"C"},
+  {q:"当学生表现出对某个话题特别感兴趣时，你会？",
+   opt:["A. 继续按计划教学。","B. 鼓励他分享更多。"], key:"B", dim:"C"},
+  {q:"学生突然沉默不语，你会？",
+   opt:["A. 课后询问他是否还好。","B. 忽略他，继续上课。"], key:"A", dim:"C"},
+
+  // 情绪共情 E（11–20）
+  {q:"当学生兴高采烈地分享他的成就时，你会？",
+   opt:["A. 为他感到高兴。","B. 简单表扬后继续工作。"], key:"A", dim:"E"},
+  {q:"看到学生哭泣时，你会？",
+   opt:["A. 让他自己平静下来。","B. 感到心疼并安慰他。"], key:"B", dim:"E"},
+  {q:"当学生紧张地参加比赛时，你会？",
+   opt:["A. 保持冷静，告诉他放松。","B. 也感到紧张并鼓励他。"], key:"B", dim:"E"},
+  {q:"学生因失败而沮丧，你会？",
+   opt:["A. 告诉他失败是常事。","B. 感到难过并鼓励他。"], key:"B", dim:"E"},
+  {q:"当学生愤怒地抱怨时，你会？",
+   opt:["A. 也感到愤怒或沮丧。","B. 不感到愤怒，保持冷静。"], key:"A", dim:"E"},
+  {q:"当学生快乐地玩耍时，你会？",
+   opt:["A. 忙于自己的工作。","B. 也感到快乐。"], key:"B", dim:"E"},
+  {q:"学生因失去宠物而悲伤，你会？",
+   opt:["A. 告诉他不要难过。","B. 感到悲伤。"], key:"B", dim:"E"},
+  {q:"当学生兴奋地讲述假期经历时，你会？",
+   opt:["A. 分享他的兴奋。","B. 简要回应后转移话题。"], key:"A", dim:"E"},
+  {q:"学生因被误解而委屈，你会？",
+   opt:["A. 客观分析情况。","B. 感到不公平并同情他。"], key:"B", dim:"E"},
+  {q:"当学生取得进步时，你会？",
+   opt:["A. 认为这是应该的。","B. 感到自豪和高兴。"], key:"B", dim:"E"},
+
+  // 行为共情 B（21–30）
+  {q:"当学生遇到学习困难时，你会？",
+   opt:["A. 鼓励他自己解决。","B. 主动提供额外辅导。"], key:"B", dim:"B"},
+  {q:"学生生病缺课，你会？",
+   opt:["A. 联系他并提供学习材料。","B. 等他回校后补课。"], key:"A", dim:"B"},
+  {q:"学生与同学关系不好，你会？",
+   opt:["A. 让他自己处理人际关系。","B. 组织活动帮助他融入。"], key:"B", dim:"B"},
+  {q:"当学生家庭经济困难时，你会？",
+   opt:["A. 建议他寻求学校帮助。","B. 设法提供帮助或资源。"], key:"B", dim:"B"},
+  {q:"学生情绪低落，你会？",
+   opt:["A. 给他时间自己恢复。","B. 找他谈心，了解情况。"], key:"B", dim:"B"},
+  {q:"当家长抱怨教学问题时，你会？",
+   opt:["A. 防御性地回应。","B. 耐心倾听并解释。"], key:"B", dim:"B"},
+  {q:"同事需要帮助管理班级，你会？",
+   opt:["A. 主动协助。","B. 专注于自己的班级。"], key:"A", dim:"B"},
+  {q:"当学生提出个人问题时，你会？",
+   opt:["A. 推荐他找辅导员。","B. 花时间倾听并建议。"], key:"B", dim:"B"},
+  {q:"学生需要额外资源学习，你会？",
+   opt:["A. 告诉他利用现有资源。","B. 提供或寻找资源。"], key:"B", dim:"B"},
+  {q:"当学生被欺负时，你会？",
+   opt:["A. 报告给学校处理。","B. 立即干预并保护他。"], key:"B", dim:"B"}
 ];
-
-// 计算每个维度的题目总数（与 Pygame 版本一致）
-const maxScores = questions.reduce((acc, q) => {
-  acc[q.dimension] = (acc[q.dimension] || 0) + 1;
-  return acc;
-}, {C:0, E:0, B:0});
-
-// 共情类型定义（与 Pygame 版本一致）
-const empathyTypes = {
-  "HHH": { name: "心灵导师型", desc: "认知、情绪、行为三个维度均高。您能精准理解学生，感同身受，并总能采取恰当的支援行动。" },
-  "HLH": { name: "理智导航员型", desc: "高认知、低情绪、高行为。您能冷静分析学生的问题并有效行动，但不太卷入情绪。" },
-  "LHH": { name: "炽热火焰型", desc: "低认知、高情绪、高行为。您富有同情心与行动力，但有时可能好心办错事。" },
-  "HHL": { name: "逻辑分析师型", desc: "高认知、高情绪、低行为。您能洞察学生的心理，但行动上稍显保守。" },
-  "LLH": { name: "淡泊守护者型", desc: "低认知、低情绪、高行为。您通过行动表达关怀，务实而温和。" },
-  "LHL": { name: "知心听众型", desc: "低认知、高情绪、低行为。您心地柔软，乐于倾听但行动不足。" },
-  "HLL": { name: "规则执行者型", desc: "高认知、低情绪、低行为。您理性分析但感情投入较少。" },
-  "LLL": { name: "客观观察者型", desc: "三个维度均低，您更注重知识传授与规则执行。" }
-};
-
-let radarData = null;   // 用于在结果 trial 的 on_load 中画图
 
 /**********************
  * 初始化 jsPsych
  **********************/
-const jsPsych = initJsPsych({
-  on_finish: function() {
-    // 实验结束后的回调，这里暂时不用做额外处理
-  }
-});
-
+const jsPsych = initJsPsych();
 const timeline = [];
 
 /**********************
- * 欢迎页 / 说明页
+ * 欢迎页
  **********************/
-const welcome = {
+timeline.push({
   type: jsPsychHtmlButtonResponse,
   stimulus: `
-    <div style="max-width:800px; margin: 0 auto; line-height:1.8; text-align:left;">
+    <div style="line-height:1.8;">
       <h2>中小学教师共情特点测试</h2>
-      <p>本测验共有 <strong>${questions.length}</strong> 道题，每题有两个选项，请根据你在真实教学中的<span style="color:#d9534f;">自然倾向</span>作答，没有对错之分。</p>
-      <p>作答完成后，系统会计算你在<strong>认知共情 (C)</strong>、<strong>情绪共情 (E)</strong> 和<strong>行为共情 (B)</strong> 三个维度的得分，并给出共情类型与雷达图。</p>
-      <p style="text-align:center; margin-top:20px;">点击下方按钮开始测试。</p>
+      <p>本测验共有 <strong>${questions.length}</strong> 道题，每题两个选项。</p>
+      <p>请根据你在真实教学中的<span style="color:#d9534f;">自然反应</span>作答，没有对错之分。</p>
+      <p style="text-align:center;margin-top:20px;">点击“开始测试”进入题目。</p>
     </div>
   `,
-  choices: ['开始测试']
-};
-timeline.push(welcome);
+  choices:['开始测试']
+});
 
 /**********************
  * 题目 trial
  **********************/
 questions.forEach((q, idx) => {
-  const trial = {
+  timeline.push({
     type: jsPsychHtmlButtonResponse,
     stimulus: `
-      <div style="max-width:800px; margin:0 auto; text-align:left; line-height:1.8;">
+      <div style="line-height:1.8;">
         <h3>第 ${idx + 1} / ${questions.length} 题</h3>
-        <p>${q.question}</p>
+        <p style="font-size:18px;">${q.q}</p>
       </div>
     `,
-    choices: q.options,
-    data: {
-      dimension: q.dimension,
-      task: "question",
-      index: idx + 1
-    },
+    choices: q.opt,            // 两个选项 A / B
+    // 这里不再使用 button_html 数组，避免长度不匹配的报错
+    data: {dim: q.dim, key: q.key, index: idx + 1},
     on_finish: function(data) {
-      // A 选项(按钮 index 0) 记 1 分；B 选项(按钮 index 1) 记 0 分
-      data.score = (data.response === 0) ? 1 : 0;
+      const chosen = (data.response === 0) ? "A" : "B"; // 0 -> 第一个选项, 1 -> 第二个
+      data.score = (chosen === data.key) ? 1 : 0;       // 选中“计分选项”得 1 分
+      data.task = "question";
     }
-  };
-  timeline.push(trial);
+  });
 });
 
 /**********************
- * 结果与雷达图 trial
+ * 结果 + 雷达图 trial
  **********************/
-const resultTrial = {
+timeline.push({
   type: jsPsychHtmlButtonResponse,
   stimulus: function() {
-    // 取出所有题目数据
     const trials = jsPsych.data.get().filter({task: "question"}).values();
-
-    const scores = {C:0, E:0, B:0};
-    const labelsCN = {C:"认知共情", E:"情绪共情", B:"行为共情"};
-
+    const scores = {C: 0, E: 0, B: 0};
     trials.forEach(t => {
-      const dim = t.dimension;
-      if (scores.hasOwnProperty(dim)) {
-        scores[dim] += t.score || 0;
-      }
+      scores[t.dim] += t.score;
     });
 
-    // 计算比例并生成 H / L 代码
-    const percents = {};
-    let code = "";
-    ["C", "E", "B"].forEach(dim => {
-      const max = maxScores[dim] || 1;
-      const ratio = scores[dim] / max;
-      percents[dim] = ratio;
-      code += (ratio >= 0.5) ? "H" : "L";
-    });
+    // 每维度 10 题，每题 1 分，最大 10
+    const percC = scores.C / 10;
+    const percE = scores.E / 10;
+    const percB = scores.B / 10;
 
-    const typeInfo = empathyTypes[code] || empathyTypes["LLL"];
-
-    // 供 Chart.js 使用的数据
-    radarData = {
-      labels: [labelsCN["C"], labelsCN["E"], labelsCN["B"]],
-      data: [percents["C"], percents["E"], percents["B"]],
-      scores: scores,
-      maxScores: maxScores,
-      typeInfo: typeInfo
+    // 存到全局，给 on_load 的 Chart.js 用
+    window.radarData = {
+      labels: ["认知共情", "情绪共情", "行为共情"],
+      data: [percC, percE, percB],
+      raw: scores
     };
 
-    // 结果页 HTML
     return `
-      <div style="max-width:900px; margin:0 auto; text-align:left; line-height:1.8;">
+      <div style="line-height:1.8;">
         <h2>测试结果</h2>
-        <h3>您的共情类型：<span style="color:#007bff;">${typeInfo.name}</span></h3>
-        <p>${typeInfo.desc}</p>
-
-        <h4>各维度得分：</h4>
         <ul>
-          <li>认知共情 (C)：${scores.C} / ${maxScores.C}</li>
-          <li>情绪共情 (E)：${scores.E} / ${maxScores.E}</li>
-          <li>行为共情 (B)：${scores.B} / ${maxScores.B}</li>
+          <li>认知共情 (C)：${scores.C} / 10</li>
+          <li>情绪共情 (E)：${scores.E} / 10</li>
+          <li>行为共情 (B)：${scores.B} / 10</li>
         </ul>
-
-        <p>下面的雷达图展示您在三个维度上的<strong>得分比例（0~1）</strong>：</p>
-        <div style="width:420px; height:420px; margin:0 auto;">
+        <p>下方雷达图展示三个维度的<strong>相对水平（0~1）</strong>：</p>
+        <div style="width:420px;height:420px;margin:0 auto;">
           <canvas id="radarChart"></canvas>
         </div>
-
-        <p style="margin-top:20px; font-size:0.95em; color:#666;">
-          注意：本测验仅用于教学和自我觉察参考，不作为临床诊断依据。
+        <p style="margin-top:16px;font-size:13px;color:#666;">
+          提示：本测验仅用于教学与自我觉察，不作为专业诊断依据。
         </p>
       </div>
     `;
   },
-  choices: ['重新测试'],
   on_load: function() {
-    // 绘制雷达图
     const ctx = document.getElementById('radarChart').getContext('2d');
+    const d = window.radarData;
     new Chart(ctx, {
       type: 'radar',
       data: {
-        labels: radarData.labels,
+        labels: d.labels,
         datasets: [{
           label: '得分比例',
-          data: radarData.data,
-          backgroundColor: 'rgba(54, 162, 235, 0.25)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-          pointRadius: 4,
-          pointHoverRadius: 6
+          data: d.data,
+          backgroundColor: 'rgba(0, 123, 255, 0.25)',
+          borderColor: 'rgba(0, 123, 255, 1)',
+          borderWidth: 2,
+          pointBackgroundColor: 'rgba(0, 123, 255, 1)',
+          pointRadius: 4
         }]
       },
       options: {
@@ -236,36 +242,26 @@ const resultTrial = {
           r: {
             beginAtZero: true,
             max: 1,
-            ticks: {
-              stepSize: 0.2
-            },
-            grid: {
-              circular: true
-            }
+            ticks: { stepSize: 0.2 },
+            grid: { circular: true }
           }
         },
         plugins: {
-          legend: {
-            display: true
-          }
+          legend: { display: false }
         }
       }
     });
   },
+  choices: ['重新测试'],
   on_finish: function() {
-    // 点击“重新测试”按钮后重启实验
     jsPsych.restart();
   }
-};
-timeline.push(resultTrial);
+});
 
 /**********************
  * 运行实验
  **********************/
 jsPsych.run(timeline);
-
 </script>
 </body>
 </html>
-
-
